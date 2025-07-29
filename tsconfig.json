@@ -1,0 +1,38 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./apps/docs"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/database"
+    },
+    {
+      "path": "./packages/api"
+    },
+    {
+      "path": "./packages/auth"
+    },
+    {
+      "path": "./packages/config"
+    },
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/tooling"
+    }
+  ]
+}

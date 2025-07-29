@@ -1,0 +1,1 @@
+module.exports = require('@blogger/config/.prettierrc.json');

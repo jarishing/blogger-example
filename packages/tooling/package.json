@@ -1,0 +1,23 @@
+{
+  "name": "@conduit/tooling",
+  "version": "0.0.0",
+  "description": "Shared tooling configurations for the RealWorld application",
+  "main": "./index.js",
+  "exports": {
+    "./typescript/base": "./typescript/base.json",
+    "./eslint/base": "./eslint/base.js",
+    "./eslint/nextjs": "./eslint/nextjs.js",
+    "./eslint/node": "./eslint/node.js",
+    "./prettier": "./prettier/index.js",
+    "./tailwind/base": "./tailwind/base.js"
+  },
+  "scripts": {
+    "clean": "echo 'No build needed for tooling package'"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
