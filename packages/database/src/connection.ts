@@ -1,25 +1,75 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "./schema";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { dbConfig, poolConfig } from './config';
+import * as schema from './schema';
 
-// Connection string - in production this should come from environment variables
-const connectionString = process.env.DATABASE_URL || "postgresql://localhost:5432/realworld";
+// Create connection pool
+export const createPool = (): Pool => {
+  if (dbConfig.connectionString) {
+    return new Pool({
+      connectionString: dbConfig.connectionString,
+      max: poolConfig.max,
+      min: poolConfig.min,
+      idleTimeoutMillis: poolConfig.idle,
+      connectionTimeoutMillis: poolConfig.acquire,
+      ssl: dbConfig.ssl ? { rejectUnauthorized: false } : false
+    });
+  }
 
-// Create the postgres connection
-const client = postgres(connectionString, {
-  max: 10,
-  idle_timeout: 20,
-  connect_timeout: 10,
-});
+  return new Pool({
+    host: dbConfig.host,
+    port: dbConfig.port,
+    database: dbConfig.database,
+    user: dbConfig.username,
+    password: dbConfig.password,
+    max: poolConfig.max,
+    min: poolConfig.min,
+    idleTimeoutMillis: poolConfig.idle,
+    connectionTimeoutMillis: poolConfig.acquire,
+    ssl: dbConfig.ssl ? { rejectUnauthorized: false } : false
+  });
+};
 
-// Create the drizzle database instance
-export const db = drizzle(client, { 
-  schema,
-  logger: process.env.NODE_ENV === "development",
-});
+// Global connection pool instance
+let pool: Pool | undefined;
 
-// Export the client for direct access if needed
-export { client };
+export const getPool = (): Pool => {
+  if (!pool) {
+    pool = createPool();
+  }
+  return pool;
+};
 
-// Type for the database instance
-export type Database = typeof db;
+// Create Drizzle database instance
+export const createDatabase = (customPool?: Pool) => {
+  const dbPool = customPool || getPool();
+  return drizzle(dbPool, { schema });
+};
+
+// Default database instance
+export const db = createDatabase();
+
+// Connection utilities
+export const closeConnection = async (): Promise<void> => {
+  if (pool) {
+    await pool.end();
+    pool = undefined;
+  }
+};
+
+export const testConnection = async (): Promise<boolean> => {
+  try {
+    const testPool = getPool();
+    const client = await testPool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    return true;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Database connection test failed:', error);
+    return false;
+  }
+};
+
+// Export types for use in other packages
+export type Database = ReturnType<typeof createDatabase>;

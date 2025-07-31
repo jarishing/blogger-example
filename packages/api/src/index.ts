@@ -7,12 +7,8 @@
 // export * from "./types";
 
 // Basic tRPC setup placeholder
-export const createTRPCRouter = () => {
-  // This will be implemented when building actual API routes
-  return {};
-};
+export const createTRPCRouter = () => ({});
+// This will be implemented when building actual API routes
 
-export const createCallerFactory = () => {
-  // This will be implemented when building actual API routes
-  return {};
-};
+export const createCallerFactory = () => ({});
+// This will be implemented when building actual API routes

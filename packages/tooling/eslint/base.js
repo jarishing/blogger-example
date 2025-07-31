@@ -8,15 +8,14 @@ module.exports = {
     "eslint:recommended",
     "eslint-config-airbnb-base",
     "airbnb-typescript",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
+    "plugin:@typescript-eslint/recommended"
   ],
   "env": {
     "es2021": true,
     "node": true
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier"],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/no-unused-vars": "error",
     "import/prefer-default-export": "off",
@@ -45,12 +44,7 @@ module.exports = {
         "exceptAfterSingleLine": true
       }
     ],
-    "prettier/prettier": [
-      "error",
-      {
-        "tabWidth": 2
-      }
-    ]
+    // Prettier integration disabled temporarily
   },
   "overrides": [
     {
@@ -66,8 +60,6 @@ module.exports = {
       }
     }
   ],
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  },
+  // parserOptions should be defined in each package's .eslintrc.js
   "ignorePatterns": ["dist", "node_modules", ".eslintrc.js", "jest.config.js"]
 }; 

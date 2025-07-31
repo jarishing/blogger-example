@@ -1,4 +1,4 @@
-import type { User } from "@conduit/types";
+import type { User } from '@conduit/types';
 
 export interface JwtPayload {
   userId: string;

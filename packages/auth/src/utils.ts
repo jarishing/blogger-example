@@ -1,11 +1,12 @@
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import { JwtPayload, TokenPair } from "./types";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
+import { JwtPayload, TokenPair } from './types';
 
 export class AuthUtils {
   private static readonly SALT_ROUNDS = 12;
-  private static readonly ACCESS_TOKEN_EXPIRES = "15m";
-  private static readonly REFRESH_TOKEN_EXPIRES = "7d";
+  private static readonly ACCESS_TOKEN_EXPIRES = '15m';
+  private static readonly REFRESH_TOKEN_EXPIRES = '7d';
 
   /**
    * Hash a password using bcrypt
@@ -24,32 +25,32 @@ export class AuthUtils {
   /**
    * Generate JWT access token
    */
-  static generateAccessToken(payload: Omit<JwtPayload, "iat" | "exp">, secret: string): string {
-    return jwt.sign(payload, secret, { 
+  static generateAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string): string {
+    return jwt.sign(payload, secret, {
       expiresIn: this.ACCESS_TOKEN_EXPIRES,
-      issuer: "realworld-app",
-      audience: "realworld-users",
+      issuer: 'realworld-app',
+      audience: 'realworld-users'
     });
   }
 
   /**
    * Generate JWT refresh token
    */
-  static generateRefreshToken(payload: Omit<JwtPayload, "iat" | "exp">, secret: string): string {
-    return jwt.sign(payload, secret, { 
+  static generateRefreshToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string): string {
+    return jwt.sign(payload, secret, {
       expiresIn: this.REFRESH_TOKEN_EXPIRES,
-      issuer: "realworld-app",
-      audience: "realworld-users",
+      issuer: 'realworld-app',
+      audience: 'realworld-users'
     });
   }
 
   /**
    * Generate both access and refresh tokens
    */
-  static generateTokenPair(payload: Omit<JwtPayload, "iat" | "exp">, secret: string): TokenPair {
+  static generateTokenPair(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string): TokenPair {
     return {
       accessToken: this.generateAccessToken(payload, secret),
-      refreshToken: this.generateRefreshToken(payload, secret),
+      refreshToken: this.generateRefreshToken(payload, secret)
     };
   }
 
@@ -59,11 +60,11 @@ export class AuthUtils {
   static verifyToken(token: string, secret: string): JwtPayload {
     try {
       return jwt.verify(token, secret, {
-        issuer: "realworld-app",
-        audience: "realworld-users",
+        issuer: 'realworld-app',
+        audience: 'realworld-users'
       }) as JwtPayload;
     } catch (error) {
-      throw new Error("Invalid or expired token");
+      throw new Error('Invalid or expired token');
     }
   }
 
@@ -83,10 +84,10 @@ export class AuthUtils {
    */
   static extractTokenFromHeader(authorization?: string): string | null {
     if (!authorization) return null;
-    
-    const [scheme, token] = authorization.split(" ");
-    if (scheme !== "Bearer" || !token) return null;
-    
+
+    const [scheme, token] = authorization.split(' ');
+    if (scheme !== 'Bearer' || !token) return null;
+
     return token;
   }
 
@@ -94,7 +95,7 @@ export class AuthUtils {
    * Generate secure random token for password resets, email verification, etc.
    */
   static generateSecureToken(): string {
-    return require("crypto").randomBytes(32).toString("hex");
+    return randomBytes(32).toString('hex');
   }
 
   /**
@@ -105,26 +106,26 @@ export class AuthUtils {
     errors: string[];
   } {
     const errors: string[] = [];
-    
+
     if (password.length < 8) {
-      errors.push("Password must be at least 8 characters long");
+      errors.push('Password must be at least 8 characters long');
     }
-    
+
     if (!/[A-Z]/.test(password)) {
-      errors.push("Password must contain at least one uppercase letter");
+      errors.push('Password must contain at least one uppercase letter');
     }
-    
+
     if (!/[a-z]/.test(password)) {
-      errors.push("Password must contain at least one lowercase letter");
+      errors.push('Password must contain at least one lowercase letter');
     }
-    
+
     if (!/\d/.test(password)) {
-      errors.push("Password must contain at least one number");
+      errors.push('Password must contain at least one number');
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors,
+      errors
     };
   }
 }

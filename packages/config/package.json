@@ -16,6 +16,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "eslint \"src/**/*.ts*\"",
+    "lint:fix": "eslint \"src/**/*.ts*\" --fix",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
@@ -25,7 +26,12 @@
   "devDependencies": {
     "@conduit/tooling": "*",
     "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0",
     "tsup": "^8.0.1",
     "typescript": "^5.3.3"
   },

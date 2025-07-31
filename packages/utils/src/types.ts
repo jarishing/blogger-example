@@ -27,14 +27,14 @@ export type OmitByType<T, U> = Omit<T, KeysOfType<T, U>>;
 // Branded types for better type safety
 export type Brand<T, U> = T & { __brand: U };
 
-export type Email = Brand<string, "email">;
-export type Username = Brand<string, "username">;
-export type HashedPassword = Brand<string, "hashedPassword">;
-export type JwtToken = Brand<string, "jwtToken">;
-export type Slug = Brand<string, "slug">;
+export type Email = Brand<string, 'email'>;
+export type Username = Brand<string, 'username'>;
+export type HashedPassword = Brand<string, 'hashedPassword'>;
+export type JwtToken = Brand<string, 'jwtToken'>;
+export type Slug = Brand<string, 'slug'>;
 
 // Result type for error handling
-export type Result<T, E = Error> = 
+export type Result<T, E = Error> =
   | { success: true; data: T }
   | { success: false; error: E };
 
@@ -55,7 +55,7 @@ export interface PaginationResult<T> {
 }
 
 // Sort types
-export type SortOrder = "asc" | "desc";
+export type SortOrder = 'asc' | 'desc';
 
 export interface SortOptions<T> {
   field: keyof T;
@@ -63,7 +63,7 @@ export interface SortOptions<T> {
 }
 
 // Filter types
-export type FilterOperator = "eq" | "ne" | "lt" | "le" | "gt" | "ge" | "in" | "like";
+export type FilterOperator = 'eq' | 'ne' | 'lt' | 'le' | 'gt' | 'ge' | 'in' | 'like';
 
 export interface FilterCondition<T> {
   field: keyof T;

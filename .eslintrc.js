@@ -1,6 +1,8 @@
 /** @type {import('eslint').Linter.Config} */
+const path = require('path');
+
 module.exports = {
   root: true,
-  extends: ['@conduit/tooling/eslint/base'],
-  ignorePatterns: ['dist', 'node_modules', 'apps', 'packages']
+  extends: [path.resolve(__dirname, 'packages/tooling/eslint/base.js')],
+  ignorePatterns: ['dist', 'node_modules', 'apps']
 };

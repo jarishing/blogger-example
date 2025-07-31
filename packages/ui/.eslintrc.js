@@ -1,5 +1,7 @@
+const path = require('path');
+
 module.exports = {
-  extends: ['@conduit/tooling/eslint/nextjs'],
+  extends: [path.resolve(__dirname, '../tooling/eslint/base.js')],
   parserOptions: {
     project: './tsconfig.json'
   },
