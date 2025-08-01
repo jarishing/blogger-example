@@ -1,94 +1,120 @@
-// Common types
-export interface BaseEntity {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+/**
+ * @blogger/types - Shared TypeScript types for the Modern Blogger application
+ *
+ * This package provides comprehensive type definitions for all aspects of the blogger platform,
+ * including users, articles, authentication, API responses, and more.
+ *
+ * @version 0.0.0
+ * @author Blogger Team
+ */
 
-// User types
-export interface User extends BaseEntity {
-  email: string;
-  username: string;
-  bio?: string;
-  image?: string;
-}
+// Base types and common interfaces
+export type {
+  BaseEntity,
+  EntityWithStatus,
+  RecordStatus,
+  PaginationParams,
+  PaginatedResponse,
+  SortParams,
+  FilterParams,
+  Optional,
+  RequiredFields,
+  DeepPartial,
+  RelationOptions,
+  ContentType,
+  UserRole,
+  PublicationStatus
+} from './base';
 
-export interface Profile {
-  username: string;
-  bio?: string;
-  image?: string;
-  following: boolean;
-}
+// User-related types
+export * from './user';
 
-// Article types
-export interface Article extends BaseEntity {
-  slug: string;
-  title: string;
-  description: string;
-  body: string;
-  tagList: string[];
-  favorited: boolean;
-  favoritesCount: number;
-  author: Profile;
-}
+// Article and content types
+export * from './article';
 
-export interface Comment extends BaseEntity {
-  body: string;
-  author: Profile;
-}
+// Authentication and authorization types (with explicit re-exports to avoid conflicts)
+export type {
+  JWTPayload,
+  AuthResponse,
+  TokenPair,
+  SessionInfo,
+  LoginRequest,
+  RegisterRequest,
+  PasswordResetRequest,
+  PasswordResetConfirm,
+  EmailVerificationRequest,
+  RefreshTokenRequest,
+  LogoutRequest,
+  ChangePasswordRequest,
+  TwoFactorSetup,
+  TwoFactorVerify,
+  TwoFactorBackupCode,
+  Permission,
+  RolePermission,
+  SecurityEvent,
+  SecurityEventType,
+  ApiKey,
+  CreateApiKeyRequest,
+  OAuthProvider,
+  OAuthConnection,
+  AccountVerification,
+  LoginAttempt,
+  AccountLockout,
+  AuthContext,
+  AuthErrorCode
+} from './auth';
 
-// Authentication types
-export interface LoginData {
-  email: string;
-  password: string;
-}
+// API and utility types (with explicit re-exports to avoid conflicts)
+export type {
+  ApiResponse,
+  ResponseMeta,
+  PaginationMeta,
+  ApiError,
+  ErrorDetails,
+  ValidationError,
+  HealthCheckResponse,
+  ServiceHealth,
+  HealthMetrics,
+  AnalyticsEvent,
+  EventMetadata,
+  WebhookEvent,
+  WebhookSubscription,
+  RetryPolicy,
+  FileUpload,
+  ImageUpload,
+  ImageVariant,
+  SearchRequest,
+  SortOptions,
+  PaginationRequest,
+  SearchResponse,
+  SearchHit,
+  FacetResult,
+  CacheEntry,
+  CacheStats,
+  BackgroundJob,
+  JobStatus,
+  EmailTemplate,
+  EmailMessage,
+  EmailAttachment,
+  Notification,
+  NotificationChannel,
+  FeatureFlag,
+  FeatureFlagRule,
+  FeatureFlagVariant,
+  ABTest,
+  ABTestVariant
+} from './api';
 
-export interface RegisterData {
-  username: string;
-  email: string;
-  password: string;
-}
+// Resolve naming conflicts by aliasing
+export type {
+  DeviceInfo as AuthDeviceInfo,
+  LocationInfo as AuthLocationInfo,
+  RateLimitInfo as AuthRateLimitInfo
+} from './auth';
 
-export interface AuthResponse {
-  user: User;
-  token: string;
-}
-
-// API types
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-export interface ApiError {
-  message: string;
-  code?: string;
-  statusCode: number;
-}
-
-// Form types
-export interface CreateArticleData {
-  title: string;
-  description: string;
-  body: string;
-  tagList?: string[];
-}
-
-export interface UpdateArticleData {
-  title?: string;
-  description?: string;
-  body?: string;
-}
-
-export interface UpdateUserData {
-  email?: string;
-  username?: string;
-  bio?: string;
-  image?: string;
-}
-
-export interface CreateCommentData {
-  body: string;
-}
+export type {
+  DeviceInfo as ApiDeviceInfo,
+  LocationInfo as ApiLocationInfo,
+  RateLimitInfo as ApiRateLimitInfo,
+  UTMParameters
+} from './api';
