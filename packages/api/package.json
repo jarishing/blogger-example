@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@conduit/tooling": "*",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.10.6",
     "eslint": "^8.57.0",
     "tsup": "^8.0.1",
