@@ -3,6 +3,10 @@
  */
 
 import { TRPCError } from '@trpc/server';
+
+// Simple Gateway + Saga imports
+import { UserServiceClient } from '../services/SimpleServiceClient';
+
 import { createTRPCRouter, publicProcedure, protectedProcedure } from '../trpc';
 import {
   updateProfileSchema,
@@ -46,25 +50,51 @@ export const usersRouter = createTRPCRouter({
 
   /**
    * Update Current User Profile
+   * Uses Saga orchestration for complex profile updates that affect multiple services
    */
   updateProfile: protectedProcedure
     .input(updateProfileSchema)
     .mutation(async ({ input, ctx }) => {
-      // TODO: Implement profile update logic
-      // This would typically:
-      // 1. Validate unique constraints (username, email)
-      // 2. Update user profile fields
-      // 3. Handle image uploads if provided
-      // 4. Return updated profile
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Authentication required'
+        });
+      }
 
       const {
         username, email, bio, image
       } = input;
 
-      throw new TRPCError({
-        code: 'NOT_IMPLEMENTED',
-        message: 'Update profile endpoint not yet implemented'
-      });
+      try {
+        // Simple Gateway pattern - call User service directly
+        const userService = new UserServiceClient();
+        const response = await userService.updateProfile(ctx.user.userId, {
+          username,
+          email,
+          bio,
+          image
+        });
+
+        if (!response.success) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `Profile update failed: ${response.error}`
+          });
+        }
+
+        return {
+          user: response.data,
+          success: true
+        };
+
+      } catch (error) {
+        console.error('Profile update failed:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`
+        });
+      }
     }),
 
   /**

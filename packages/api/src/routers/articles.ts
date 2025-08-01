@@ -3,10 +3,10 @@
  */
 
 import { TRPCError } from '@trpc/server';
-import { eq, desc, ilike, and, or, count } from 'drizzle-orm';
 
-// Database imports
-import { db, articles, comments, articleFavorites, users } from '@conduit/database';
+// Simple Gateway + Saga imports
+import { ArticleServiceClient, UserServiceClient } from '../services/SimpleServiceClient';
+import { ArticlePublicationSaga } from '../services/SimpleSaga';
 
 // Types imports
 import type { 
@@ -44,7 +44,7 @@ import {
 export const articlesRouter = createTRPCRouter({
   /**
    * Create Article
-   * Demonstrates proper integration with @database and @types packages
+   * Uses Gateway + Saga orchestration pattern for complex article creation
    */
   create: protectedProcedure
     .input(createArticleSchema)
@@ -62,44 +62,27 @@ export const articlesRouter = createTRPCRouter({
       } = input;
 
       try {
-        // 2. Generate slug from title
-        const slug = title
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .trim();
+        // 2. Use Simple Article Publication Saga
+        const publicationSaga = new ArticlePublicationSaga(
+          { title, description, body, tags: tags || [] },
+          ctx.user.userId
+        );
 
-        // 3. Generate unique article ID
-        const articleId = `article_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // 3. Execute the saga (creates article + updates stats)
+        const result = await publicationSaga.executePublication();
 
-        // 4. Create article record using Drizzle ORM
-        const [newArticle] = await db
-          .insert(articles)
-          .values({
-            articleId,
-            title,
-            slug,
-            description,
-            body,
-            userId: ctx.user.userId,
-            recordStatus: 'active'
-          })
-          .returning();
+        // 4. Get author info for response
+        const userService = new UserServiceClient();
+        const authorResponse = await userService.getUser(ctx.user.userId);
 
-        // 5. Get author information for response
-        const [author] = await db
-          .select({
-            userId: users.userId,
-            username: users.username,
-            bio: users.bio,
-            image: users.image
-          })
-          .from(users)
-          .where(eq(users.userId, ctx.user.userId));
+        const author = authorResponse.success ? authorResponse.data : {
+          userId: ctx.user.userId,
+          username: ctx.user.username || 'Unknown'
+        };
 
-        // 6. Return properly typed response
+        // 5. Return simple response
         return {
-          ...newArticle,
+          ...result.create_article,
           author: author as PublicUser,
           isFavorited: false,
           favoritesCount: 0,
@@ -114,10 +97,10 @@ export const articlesRouter = createTRPCRouter({
         } as PublicArticle;
 
       } catch (error) {
-        console.error('Error creating article:', error);
+        console.error('Article creation saga failed:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create article'
+          message: `Failed to create article: ${error instanceof Error ? error.message : 'Unknown error'}`
         });
       }
     }),
@@ -146,24 +129,61 @@ export const articlesRouter = createTRPCRouter({
 
   /**
    * Get Article by ID
+   * Uses Gateway pattern to fetch article with aggregated data
    */
   getById: publicProcedure
     .input(getArticleByIdSchema)
-    .query(async ({ input, ctx }) => {
-      // TODO: Implement get article by ID logic
-      // This would typically:
-      // 1. Fetch article from database
-      // 2. Include author information
-      // 3. Calculate favorite/like status for current user
-      // 4. Increment view count
-      // 5. Return article with metadata
-
+    .query(async ({ input, ctx }): Promise<PublicArticle> => {
       const { articleId } = input;
 
-      throw new TRPCError({
-        code: 'NOT_IMPLEMENTED',
-        message: 'Get article by ID endpoint not yet implemented'
-      });
+      try {
+        // 1. Simple Gateway pattern - call Article service
+        const articleService = new ArticleServiceClient();
+        const articleResponse = await articleService.getArticle(articleId);
+        
+        if (!articleResponse.success) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Article not found'
+          });
+        }
+
+        const article = articleResponse.data!;
+
+        // 2. Get author info from User service
+        const userService = new UserServiceClient();
+        const authorResponse = await userService.getUser(article.userId);
+        
+        const author = authorResponse.success ? authorResponse.data : {
+          userId: article.userId,
+          username: 'Unknown'
+        };
+
+        // 3. Simple response aggregation
+        return {
+          ...article,
+          author: author as PublicUser,
+          isFavorited: false,
+          favoritesCount: 0,
+          commentsCount: 0,
+          viewsCount: 0,
+          sharesCount: 0,
+          canEdit: ctx.user?.userId === article.userId,
+          status: 'published' as const,
+          contentType: 'article' as const
+        } as PublicArticle;
+
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        
+        console.error('Error getting article:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to get article'
+        });
+      }
     }),
 
   /**
